@@ -15,6 +15,8 @@ import SwiftUI
                 MenuBar(appState: appState)
                     .draggableWithOffset(appState)
             }
+            .controlSize(.large)
+            .font(.largeTitle)
         }
         .windowIdealSize(.maximum)
         .windowLevel(.floating)

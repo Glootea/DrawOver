@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MenuBar: View {
     let appState: AppState
+    @State private var showThicknessPopover = false
 
     var body: some View {
 
@@ -36,7 +37,9 @@ struct MenuBar: View {
                 ForEach(Instrument.allCases) { inst in
                     HStack {
                         Image(systemName: inst.icon)
-                        Text(inst.rawValue.capitalized)
+                        if appState.menuBarStyle == .horizontal{
+                            Text(inst.rawValue.capitalized)
+                        }
 
                     }.tag(inst)
                 }
@@ -44,16 +47,31 @@ struct MenuBar: View {
 
             ColorPicker("Brush Color", selection: brushColorBinding)
                 .labelsHidden()
-
-            Slider(value: brushThicknessBinding, in: 1...20) {
-                Text("Thickness")
+            Button {
+                showThicknessPopover = !showThicknessPopover
+            } label: {
+                Image(systemName: "textformat.size")
+            }.popover(
+                isPresented: $showThicknessPopover
+            ) {
+                Slider(value: brushThicknessBinding, in: 1...20) {
+                    VStack {
+                        Text("Thickness")
+                        Spacer()
+                    }
+                }
+                .padding()
+                .frame(width: 400)
+                .interactiveDismissDisabled(true)
             }
-            .frame(width: 150)
 
-            Button("Clear All") {
+            Button(role: .destructive) {
                 appState.lines.removeAll()
+            } label: {
+                Image(systemName: "trash")
             }
-            .buttonStyle(.borderedProminent)
+            .foregroundColor(.red)
+            // .buttonStyle(.borderedProminent)
 
             Picker("", selection: menuBarStyleBinding) {
                 ForEach(MenuBarStyle.allCases) { inst in
