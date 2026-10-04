@@ -84,10 +84,19 @@ final class AppState: Codable {
     }
 }
 
-struct Line: Codable {
+class Line: Codable {
     var points: [CGPoint]
     var colorComponents: ColorComponents = .fromColor(.blue)
     var lineWidth: CGFloat = 4.0
+
+    init(
+        points: [CGPoint], lineWidth: CGFloat = 4.0,
+        colorComponents: ColorComponents = .fromColor(.blue),
+    ) {
+        self.points = points
+        self.colorComponents = colorComponents
+        self.lineWidth = lineWidth
+    }
 }
 
 enum Instrument: String, CaseIterable, Identifiable, Codable {

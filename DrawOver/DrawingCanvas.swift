@@ -3,35 +3,59 @@ import SwiftUI
 
 struct DrawingCanvasView: View {
     let appState: AppState
+    @State private var pointerPosition: CGPoint = .zero
+    let eraseRadiusMultiplier = 2.0
 
-    private func erase(point: CGPoint) {
-        appState.lines = appState.lines.filter { line in
-            !line.points.contains(where: {
-                let brushThickness = appState.brushThickness
-                let dx = abs($0.x - point.x)
-                let dy = abs($0.y - point.y)
-                return dx < brushThickness && dy < brushThickness
-            })
+    private func erase(cursor: CGPoint) {
+        var newLines: [Line] = []
+
+        for line in appState.lines {
+            var currentLine = Line.init(
+                points: [], lineWidth: line.lineWidth, colorComponents: line.colorComponents)
+            for point in line.points {
+                let dx = abs(cursor.x - point.x)
+                let dy = abs(cursor.y - point.y)
+                if !(dx < (appState.brushThickness * eraseRadiusMultiplier)
+                    && dy < (appState.brushThickness * eraseRadiusMultiplier))
+                {
+                    currentLine.points.append(point)
+                } else {
+                    newLines.append(currentLine)
+                    currentLine = Line.init(
+                        points: [point], lineWidth: line.lineWidth,
+                        colorComponents: line.colorComponents)
+                }
+            }
+            if !currentLine.points.isEmpty {
+                newLines.append(currentLine)
+            }
         }
+        appState.lines = newLines
+    }
+
+    private func drawPointer(context: inout GraphicsContext, size: CGSize) {
+        if appState.selectedInstrument != .eraser {
+            return
+        }
+        let brushThickness = appState.brushThickness * eraseRadiusMultiplier
+        let circleRect = CGRect(
+            x: pointerPosition.x,
+            y: pointerPosition.y,
+            width: brushThickness, height: brushThickness)
+        let circlePath = Path(ellipseIn: circleRect)
+        context.stroke(circlePath, with: .color(.red.opacity(0.5)), lineWidth: 3)
+
     }
 
     private func draw(point: CGPoint) {
         let brushThickness = appState.brushThickness
         let brushColor = appState.brushColor
 
-        if var currentLine = appState.currentLine {
+        if let currentLine = appState.currentLine {
             currentLine.points.append(point)
         } else {
             appState.currentLine = Line(
-                points: [point], colorComponents: brushColor, lineWidth: brushThickness)
-        }
-        appState.lines.append(appState.currentLine!)
-
-        if appState.currentLine == nil {
-            appState.currentLine = Line(
-                points: [point], colorComponents: brushColor, lineWidth: brushThickness)
-        } else {
-            appState.currentLine?.points.append(point)
+                points: [point], lineWidth: brushThickness, colorComponents: brushColor)
         }
     }
 
@@ -52,6 +76,8 @@ struct DrawingCanvasView: View {
                 path, with: .color(currentLine.colorComponents.color),
                 lineWidth: currentLine.lineWidth)
         }
+
+        drawPointer(context: &context, size: size)
     }
 
     private var gestureHandler: some Gesture {
@@ -60,12 +86,13 @@ struct DrawingCanvasView: View {
                 let newPoint = value.location.applying(
                     CGAffineTransform(
                         translationX: -CGFloat(CURSORWIDTH), y: -CGFloat(CURSORHEIGHT)))
+                pointerPosition = newPoint
 
                 switch appState.selectedInstrument {
                 case .pen:
                     draw(point: newPoint)
                 case .eraser:
-                    erase(point: newPoint)
+                    erase(cursor: newPoint)
                 case .mouse:
                     break
                 }
@@ -76,6 +103,7 @@ struct DrawingCanvasView: View {
                     appState.lines.append(line)
                 }
                 appState.currentLine = nil
+                print(appState.lines.count)
             }
     }
 
