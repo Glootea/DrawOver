@@ -1,8 +1,17 @@
 import SwiftUI
 
 struct DraggableWithOffset: ViewModifier {
+    let appState: AppState
+
     @State var dragged = CGSize.zero
     @State var accumulated = CGSize.zero
+
+    init(appState: AppState) {
+        self.appState = appState
+        let offset = appState.offset
+        _dragged = State(initialValue: offset)
+        _accumulated = State(initialValue: offset)
+    }
 
     func body(content: Content) -> some View {
         content
@@ -10,7 +19,6 @@ struct DraggableWithOffset: ViewModifier {
             .gesture(
                 DragGesture()
                     .onChanged { value in
-                        print(value.translation)
                         dragged = CGSize(
                             width: value.translation.width + accumulated.width,
                             height: value.translation.height + accumulated.height)
@@ -20,13 +28,14 @@ struct DraggableWithOffset: ViewModifier {
                             width: value.translation.width + accumulated.width,
                             height: value.translation.height + accumulated.height)
                         accumulated = dragged
+                        appState.offset = accumulated
                     }
             )
     }
 }
 
 extension View {
-    func draggableWithOffset() -> some View {
-        self.modifier(DraggableWithOffset())
+    func draggableWithOffset(_ appState: AppState) -> some View {
+        self.modifier(DraggableWithOffset(appState: appState))
     }
 }

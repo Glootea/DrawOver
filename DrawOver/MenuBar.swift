@@ -1,17 +1,18 @@
 import SwiftUI
 
 struct MenuBar: View {
-    @Binding var appState: AppState
+    let appState: AppState
 
     var body: some View {
+
         let selectedInstrumentBinding = Binding(
             get: { appState.selectedInstrument },
             set: { appState.selectedInstrument = $0 }
         )
 
         let brushColorBinding = Binding(
-            get: { appState.brushColor },
-            set: { appState.brushColor = $0 }
+            get: { appState.brushColor.color },
+            set: { appState.brushColor = ColorComponents.fromColor($0) }
         )
 
         let brushThicknessBinding = Binding(
