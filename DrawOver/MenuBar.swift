@@ -1,0 +1,77 @@
+import SwiftUI
+
+struct MenuBar: View {
+    @Environment(AppState.self) private var appState
+
+    var body: some View {
+        let selectedInstrumentBinding = Binding(
+            get: { appState.selectedInstrument },
+            set: { appState.selectedInstrument = $0 }
+        )
+
+        let brushColorBinding = Binding(
+            get: { appState.brushColor },
+            set: { appState.brushColor = $0 }
+        )
+
+        let brushThicknessBinding = Binding(
+            get: { appState.brushThickness },
+            set: { appState.brushThickness = $0 }
+        )
+
+        let menuBarStyleBinding = Binding(
+            get: { appState.menuBarStyle },
+            set: { appState.menuBarStyle = $0 }
+        )
+
+        let layout =
+            switch appState.menuBarStyle {
+            case .horizontal: AnyLayout(HStackLayout())
+            case .vertical: AnyLayout(VStackLayout())
+            }
+
+        layout {
+            Button(
+                "OnTop", systemImage: "magnifyingglass",
+                action: {
+                    if let window = NSApp.windows.first(where: { $0.title == "DrawingCanvas" }) {
+                        window.makeKeyAndOrderFront(nil)
+                        NSApp.activate(ignoringOtherApps: true)
+                    }
+                })
+
+            Picker("", selection: selectedInstrumentBinding) {
+                ForEach(Instrument.allCases) { inst in
+                    HStack {
+                        Image(systemName: inst.icon)
+                        Text(inst.rawValue.capitalized)
+
+                    }.tag(inst)
+                }
+            }
+
+            ColorPicker("Brush Color", selection: brushColorBinding)
+                .labelsHidden()
+
+            Slider(value: brushThicknessBinding, in: 1...20) {
+                Text("Thickness")
+            }
+            .frame(width: 150)
+
+            Button("Clear All") {
+                appState.lines.removeAll()
+            }
+            .buttonStyle(.borderedProminent)
+
+            Picker("", selection: menuBarStyleBinding) {
+                ForEach(MenuBarStyle.allCases) { inst in
+                    HStack {
+                        Image(systemName: inst.icon)
+                    }.tag(inst)
+                }
+            }
+        }
+        .padding()
+        .glassEffect(in: .rect(cornerRadius: 16.0))
+    }
+}
