@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct MenuBar: View {
-    @Environment(AppState.self) private var appState
+    @Binding var appState: AppState
 
     var body: some View {
         let selectedInstrumentBinding = Binding(
@@ -31,15 +31,6 @@ struct MenuBar: View {
             }
 
         layout {
-            Button(
-                "OnTop", systemImage: "magnifyingglass",
-                action: {
-                    if let window = NSApp.windows.first(where: { $0.title == "DrawingCanvas" }) {
-                        window.makeKeyAndOrderFront(nil)
-                        NSApp.activate(ignoringOtherApps: true)
-                    }
-                })
-
             Picker("", selection: selectedInstrumentBinding) {
                 ForEach(Instrument.allCases) { inst in
                     HStack {

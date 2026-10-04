@@ -2,36 +2,23 @@ import SwiftUI
 
 @main struct MyApp: App {
     @State private var appState: AppState = AppState.initial
-    @Environment(\.openWindow) private var openWindow
+    @State private var menuBarOffset: CGSize = CGSize.zero
+    @State private var dragged = CGSize.zero
+    @State private var accumulated = CGSize.zero
 
     var body: some Scene {
-
         WindowGroup {
-            MenuBar()
-                .gesture(WindowDragGesture())
-                .background(
-                    WindowAccessor { window in
-                        window.isOpaque = false
-                        window.backgroundColor = .clear
-                        window.hasShadow = false
-                        window.styleMask = []
-
-                    }
-                )
-                .environment(appState)
-                .onAppear {
-                    openWindow(id: "MenuBar2")
-                }
-
+            ZStack {
+                DrawingCanvasView(appState: $appState)
+                    .fillWholeScreen()
+                    .setTransparentWindow()
+                MenuBar(appState: $appState)
+                    .offset(dragged)
+                    .draggableWithOffset()
+            }
         }
-        .windowLevel(.floating)
-
-        Window("DrawingCanvas", id: "MenuBar2") {
-            ContentView()
-                .environment(appState)
-        }
-        .windowResizability(.automatic)
         .windowIdealSize(.maximum)
-        .windowBackgroundDragBehavior(.enabled)
+        .environment(appState)
+        .windowLevel(.floating)
     }
 }
