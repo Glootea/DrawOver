@@ -126,9 +126,10 @@ struct ColorComponents: Codable {
     let red: Float
     let green: Float
     let blue: Float
+    let opacity: Float
 
     var color: Color {
-        Color(red: Double(red), green: Double(green), blue: Double(blue))
+        Color(red: Double(red), green: Double(green), blue: Double(blue), opacity: Double(opacity))
     }
 
     static func fromColor(_ color: Color) -> ColorComponents {
@@ -136,7 +137,8 @@ struct ColorComponents: Codable {
         return ColorComponents(
             red: resolved.red,
             green: resolved.green,
-            blue: resolved.blue
+            blue: resolved.blue,
+            opacity: resolved.opacity,
         )
     }
 }

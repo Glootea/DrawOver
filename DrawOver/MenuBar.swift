@@ -31,6 +31,8 @@ struct MenuBar: View {
             case .horizontal: AnyLayout(HStackLayout())
             case .vertical: AnyLayout(VStackLayout())
             }
+        
+        
 
         layout {
             Picker("", selection: selectedInstrumentBinding) {
@@ -44,9 +46,10 @@ struct MenuBar: View {
                     }.tag(inst)
                 }
             }
-
+            
             ColorPicker("Brush Color", selection: brushColorBinding)
                 .labelsHidden()
+            
             Button {
                 showThicknessPopover = !showThicknessPopover
             } label: {
